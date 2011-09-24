@@ -32,11 +32,6 @@ module Cinch
 
 	    def dispatch(event, msg = nil, *arguments)
 			@handlers.dispatch(event, msg, *arguments)
-			handlers = @handlers.find(event, msg)
-			handlers.each do |handler|
-				@bot.debug "Handler: #{handler.pattern}"
-				handler.call(msg, [], [])
-			end
 		end
 
 		# Registers a handler.
