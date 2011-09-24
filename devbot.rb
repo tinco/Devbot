@@ -38,18 +38,13 @@ end #module Cinch
 	on :mention, /reload/ do |m|
 		m.reply("You're not the boss of me!") and next if not m.channel.opped? m.user
 		m.reply "Reloading plugins.."
-		begin
+		if bot.reload_plugins
 			m.reply "Succesfully reloaded modules!"
-			Dir[File.dirname(__FILE__) + '/modules/*.rb'].each do |plugin|
-				load plugin
-			end
-		rescue LoadError
+		else	
 			m.reply "Sorry, I couldn't reload, #{m.user.nick} :("
 		end
 	end
-
-	on :loaded_module do
-	end
 end
 
+@bot.load_plugins
 @bot.start

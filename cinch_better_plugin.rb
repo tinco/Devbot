@@ -12,6 +12,29 @@ module Cinch
 				p.dispatch(event, msg, *arguments)
 			end
 		end
+
+		def unload_plugins
+			@better_plugins.each do |p|
+				p.destroy
+			end
+			@better_plugins = []
+		end
+
+		def load_plugins
+			begin
+				Dir[File.dirname(__FILE__) + '/modules/*.rb'].each do |plugin|
+					load plugin
+				end
+				return true
+			rescue LoadError
+				return false
+			end
+		end
+
+		def reload_plugins
+			unload_plugins
+			load_plugins
+		end
 	end
 
 	class BetterPlugin
@@ -28,6 +51,15 @@ module Cinch
 			self.class.instance_variable_get(:@handlers).each do |event, regexps, args, block|
 				on(event, regexps, *args, &block)	
 			end	
+		end
+
+		def destroy
+			handlers = @handlers.each do |h|
+				h.unregister
+				h.stop
+			end.collect
+			@handlers.unregister *handlers
+			self.class.instance_variable_set(:@handlers, nil)
 		end
 
 	    def dispatch(event, msg = nil, *arguments)
