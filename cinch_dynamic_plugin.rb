@@ -25,6 +25,7 @@ module Cinch
 				Dir[File.dirname(__FILE__) + '/modules/*.rb'].each do |plugin|
 					load plugin
 				end
+				dynamic_plugins.each(&:start)
 				return true
 			rescue LoadError
 				return false
@@ -49,8 +50,11 @@ module Cinch
 			@bot = bot
 			@handlers = HandlerList.new
 			self.class.instance_variable_get(:@handlers).each do |event, regexps, args, block|
-				on(event, regexps, *args, &block)	
+		
 			end	
+		end
+
+		def start
 		end
 
 		def destroy
