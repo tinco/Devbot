@@ -69,11 +69,11 @@ class GitWebhookListener < Sinatra::Base
 
 		# output first 3 commits
 		push["commits"][0..2].each do |c|
-			say repo, "\0030#{repo}:\0037 #{branch}\0033 #{c["author"]["name"]}\003 #{c["message"]}"
+			say repo, "\0030#{repo}/#{branch}\0033: #{c["author"]["name"]}\003 pushed:\0037 #{c["message"]}"
 		end
 
 		if push["commits"].length-2 > 0
-			say repo, "\0030#{repo}:\0037 #{branch}\003 ... and #{push["commits"].length-2} more"
+			say repo, "\0030#{repo}/#{branch}\003 ... and #{push["commits"].length-2} more"
 		end
 
 		push.inspect
