@@ -25,7 +25,7 @@ end #module Cinch
 
 @bot = Cinch::DynamicBot.new do
 	configure do |c|
-		c.nick = "devbot"
+		c.nick = "devbot-test"
 		c.port = 6660
 		c.server = "irc.xs4all.nl"
 		c.channels = ["#gtammo.test"]
