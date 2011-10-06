@@ -1,4 +1,6 @@
 require 'sinatra/base'
+require 'json'
+
 class GitWebhookListener < Sinatra::Base
 	configure do
 		set :bind, :localhost
