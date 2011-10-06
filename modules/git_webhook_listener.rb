@@ -12,7 +12,7 @@ class GitWebHookListener < Sinatra::Base
 	end
 end
 
-class GitWebhookPlugin < Cinch::BetterPlugin
+class GitWebhookPlugin < Cinch::DynamicPlugin
 	on :mention, /git/ do |msg|
 		msg.reply "I'm tracking your git!"
 	end
@@ -20,5 +20,5 @@ end
 
 if @bot
 	@bot.debug "Registering GitWebhookPlugin"
-	@bot.better_plugins << GitWebhookPlugin.new(@bot)	
+	@bot.dynamic_plugins << GitWebhookPlugin.new(@bot)	
 end

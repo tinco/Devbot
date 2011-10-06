@@ -2,7 +2,7 @@ require 'rubygems'
 require 'bundler/setup'
 
 require 'cinch'
-require './cinch_better_plugin'
+require './cinch_dynamic_plugin'
 
 module Cinch
 class IRC
@@ -23,7 +23,7 @@ class IRC
 end
 end #module Cinch
 
-@bot = Cinch::BetterBot.new do
+@bot = Cinch::DynamicBot.new do
 	configure do |c|
 		c.nick = "devbot"
 		c.port = 6660

@@ -1,23 +1,23 @@
 module Cinch
-	class BetterBot < Bot
-		attr_accessor :better_plugins
+	class DynamicBot < Bot
+		attr_accessor :dynamic_plugins
 
 		def initialize(&b)
 			super(&b)
-			@better_plugins = []
+			@dynamic_plugins = []
 		end
 
 	    def dispatch_to_plugins(event, msg = nil, *arguments)
-			@better_plugins.each do |p|
+			@dynamic_plugins.each do |p|
 				p.dispatch(event, msg, *arguments)
 			end
 		end
 
 		def unload_plugins
-			@better_plugins.each do |p|
+			@dynamic_plugins.each do |p|
 				p.destroy
 			end
-			@better_plugins = []
+			@dynamic_plugins = []
 		end
 
 		def load_plugins
@@ -37,7 +37,7 @@ module Cinch
 		end
 	end
 
-	class BetterPlugin
+	class DynamicPlugin
 		def self.on(event, regexps = [], *args, &block)
 			regexps = [*regexps]
 			regexps = [//] if regexps.empty?
