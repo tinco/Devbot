@@ -49,8 +49,10 @@ module Cinch
 		def initialize(bot)
 			@bot = bot
 			@handlers = HandlerList.new
-			self.class.instance_variable_get(:@handlers).each do |event, regexps, args, block|
-		
+			handlers = self.class.instance_variable_get(:@handlers)
+			handlers ||= []
+			handlers.each do |event, regexps, args, block|
+				on event, regexps, args, &block
 			end	
 		end
 
