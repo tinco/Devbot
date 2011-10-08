@@ -1,36 +1,42 @@
 require 'mechanize'
 class TrelloPlugin < Cinch::DynamicPlugin
 	def start
-		@activities = []
+		@activities = {}
 		@members = {}
+		@stopping = false
 
+
+		@checker = Thread.new do
+			while not @stopping
+				fetch_new_data
+				sleep 10
+			end
+		end
+	end
+
+	def init_trello
 		@trello = Mechanize.new
 		@trello.post("https://trello.com/authenticate",
 		 :user => "devbot@tinco.nl",
 		 :password => "d3vb0t",
 		 :returnUrl => '/')
-		@checker = Thread.new do
-			while true
-				sleep 10
-				fetch_new_data
-			end
-		end
 	end
 
 	def fetch_new_data
 		@bot.debug "TrelloPlugin: fetching data"
+		init_trello
 		result = @trello.get "https://trello.com/data/board/4e7066e5fda81eaba2013dc1/current"
 		if result #correct?
 			new_data = JSON.parse result.body
+
 			new_actions = new_data["actions"][0..2]
 			new_data["members"].each do |m|
 				@members[m["_id"]] = m["fullName"]
 			end
 
-			while((activity = new_actions.shift) && @activities.last.nil? ||
-				   (@activities.last && activity["_id"] !=
-									   @activities.last["_id"]))
-				@activities << activity
+			while (activity = new_actions.pop)
+				next if @activities[activity["_id"]]
+				@activities[activity["_id"]] = activity
 				announce activity
 			end
 		end
@@ -38,13 +44,21 @@ class TrelloPlugin < Cinch::DynamicPlugin
 
 	def announce(activity)
 		begin
-		@bot.debug @members.to_s
-		@bot.debug activity
-		member = @members[activity["idMemberCreator"]]
-		msg = "\0033Trello: \0030#{member}\003 "
+			member = @members[activity["idMemberCreator"]]
+			msg = "\0033Trello: \0030#{member}\003 "
 		case activity["type"]
 		when "updateCard"
-			msg += "updated a card"
+			data = activity["data"]
+			card_name = data["card"]["name"]
+			if listbefore = data["listBefore"]
+				msg += "moved card #{card_name} from #{listBefore} to #{data["listAfter"]}"
+			elsif old_name = data["old"]["name"]
+				msg += "renamed card #{old_name} to #{card_name}"
+			elsif data["old"]["position"]
+				msg += "reprioritized card #{card_name}"
+			else
+				msg += "updated a card"
+			end
 		when "addMemberToBoard"
 			msg += "added a member to the board"
 		when "createBoardInvitation"
@@ -70,7 +84,7 @@ class TrelloPlugin < Cinch::DynamicPlugin
 		when "updateList"
 			msg += "updated a list"
 		else
-			msg += "did something I don't understand (#{activity["type"]}"
+			msg += "did something I don't understand (#{activity["type"]})"
 		end
 		@bot.channels.each do |c|
 			c.send msg
@@ -81,7 +95,7 @@ class TrelloPlugin < Cinch::DynamicPlugin
 	end
 
 	def destroy
-		@checker.exit
+		@stopping = true
 	end
 end
 
