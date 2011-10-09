@@ -68,7 +68,7 @@ class TrelloPlugin < Cinch::DynamicPlugin
 				msg += "moved card #{e[card_name]} from #{e[listBefore]} to #{e[data["listAfter"]]}"
 			elsif old_name = data["old"]["name"]
 				msg += "renamed card #{e[old_name]} to #{e[card_name]}"
-			elsif data["old"]["position"]
+			elsif data["old"]["pos"]
 				msg += "reprioritized card #{e[card_name]}"
 			else
 				msg += "updated a card"
