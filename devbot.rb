@@ -6,21 +6,6 @@ require 'bundler/setup'
 require 'cinch'
 require './cinch_dynamic_plugin'
 
-module Cinch
-class IRC
-	alias old_parse parse
-	def parse(input)
-		events = old_parse(input)
-		msg = Message.new(input, @bot)
-
-		if msg.message =~ /#{@bot.nick}/
-			msg.instance_variable_set(:@events, [:mention])
-			@bot.handlers.dispatch(:mention, msg, [])
-		end
-	end
-end
-end #module Cinch
-
 config_file = "config.yml"
 if not File.exists? config_file
   puts "Can't find config file #{config_file}"
@@ -35,6 +20,10 @@ $config = YAML.load_file config_file
 		c.port = $config["port"] || 6660
 		c.server = $config["server"] || "irc.xs4all.nl"
 		c.channels = $config["channels"] || ["#devbot.test"]
+	end
+
+	on :message, /#{nick}/ do |m|
+		bot.handlers.dispatch :mention, m
 	end
 
 	on :mention, /hello/ do |m|
