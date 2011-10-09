@@ -6,13 +6,17 @@ require 'bundler/setup'
 require 'cinch'
 require './cinch_dynamic_plugin'
 
-config_file = "config.yml"
-if not File.exists? config_file
-  puts "Can't find config file #{config_file}"
-  exit
+def load_config
+	config_file = "config.yml"
+	if not File.exists? config_file
+		puts "Can't find config file #{config_file}"
+		return false
+	end
+	$config = YAML.load_file config_file
+	true
 end
 
-$config = YAML.load_file config_file
+exit unless load_config
 
 @bot = Cinch::DynamicBot.new do
 	configure do |c|
@@ -38,6 +42,11 @@ $config = YAML.load_file config_file
 		else	
 			m.reply "Sorry, I couldn't reload, #{m.user.nick} :("
 		end
+	end
+
+	on :mention, /reconfigure/ do |m|
+		load_config
+		m.reply "Loaded configuration!"
 	end
 end
 
