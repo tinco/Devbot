@@ -1,3 +1,5 @@
+require 'yaml'
+
 require 'rubygems'
 require 'bundler/setup'
 
@@ -19,12 +21,20 @@ class IRC
 end
 end #module Cinch
 
+config_file = "config.yml"
+if not File.exists? config_file
+  puts "Can't find config file #{config_file}"
+  exit
+end
+
+$config = YAML.load_file config_file
+
 @bot = Cinch::DynamicBot.new do
 	configure do |c|
-		c.nick = "devbot-test"
-		c.port = 6660
-		c.server = "irc.xs4all.nl"
-		c.channels = ["#gtammo.test"]
+		c.nick = $config["nick"] || "devbot-test"
+		c.port = $config["port"] || 6660
+		c.server = $config["server"] || "irc.xs4all.nl"
+		c.channels = $config["channels"] || ["#devbot.test"]
 	end
 
 	on :mention, /hello/ do |m|
