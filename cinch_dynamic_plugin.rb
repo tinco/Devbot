@@ -7,12 +7,6 @@ module Cinch
 			@dynamic_plugins = []
 		end
 
-	    def dispatch_to_plugins(event, msg = nil, *arguments)
-			@dynamic_plugins.each do |p|
-				p.dispatch(event, msg, *arguments)
-			end
-		end
-
 		def unload_plugins
 			@dynamic_plugins.each do |p|
 				p.destroy
@@ -46,9 +40,10 @@ module Cinch
 			@handlers << [event, regexps, args, block]	
 		end
 
+		attr_accessor :bot
+
 		def initialize(bot)
 			@bot = bot
-			@handlers = HandlerList.new
 			handlers = self.class.instance_variable_get(:@handlers)
 			handlers ||= []
 			handlers.each do |event, regexps, args, block|
@@ -61,15 +56,10 @@ module Cinch
 
 		def destroy
 			handlers = @handlers.each do |h|
-				h.unregister
 				h.stop
 			end.collect
-			@handlers.unregister *handlers
+			@bot.handlers.unregister *handlers
 			self.class.instance_variable_set(:@handlers, nil)
-		end
-
-	    def dispatch(event, msg = nil, *arguments)
-			@handlers.dispatch(event, msg, *arguments)
 		end
 
 		# Registers a handler.
@@ -79,7 +69,7 @@ module Cinch
 
 			event = event.to_sym
 
-			handlers = []
+			@handlers ||= []
 
 			regexps.each do |regexp|
 				pattern = case regexp
@@ -96,11 +86,11 @@ module Cinch
 						  end
 				@bot.debug "[on handler] Registering handler with pattern `#{pattern.inspect}`, reacting on `#{event}`"
 				handler = Handler.new(@bot, event, pattern, args, &block)
-				handlers << handler
-				@handlers.register(handler)
+				@handlers << handler
+				@bot.handlers.register handler
 			end
 
-			return handlers
+			return @handlers
 		end	
 	end
 end

@@ -11,13 +11,9 @@ class IRC
 		events = old_parse(input)
 		msg = Message.new(input, @bot)
 
-		events.each do |event, *args|
-			@bot.dispatch_to_plugins(event, msg, *args)
-		end
 		if msg.message =~ /#{@bot.nick}/
 			msg.instance_variable_set(:@events, [:mention])
 			@bot.handlers.dispatch(:mention, msg, [])
-			@bot.dispatch_to_plugins(:mention, msg, [])
 		end
 	end
 end
