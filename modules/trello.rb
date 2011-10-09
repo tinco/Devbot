@@ -18,8 +18,8 @@ class TrelloPlugin < Cinch::DynamicPlugin
 		begin
 			@trello = Mechanize.new
 			@trello.post("https://trello.com/authenticate",
-						 :user => "devbot@tinco.nl",
-						 :password => "d3vb0t",
+						 :user => $config["trello"]["user"],
+						 :password => $config["trello"]["password"],
 						 :returnUrl => '/')
 			true
 		rescue
@@ -33,7 +33,7 @@ class TrelloPlugin < Cinch::DynamicPlugin
 		return unless init_trello
 		result = nil
 		begin
-			result = @trello.get "https://trello.com/data/board/4e7066e5fda81eaba2013dc1/current"
+			result = @trello.get "https://trello.com/data/board/#{$config["trello"]["board_id"]}/current"
 		rescue => e
 			@bot.debug "Encountered error while fetching: #{e.message}"
 		end
