@@ -1,0 +1,8 @@
+Devbot is an IRC bot using the Cinch framework.
+
+Currently it sports the following features:
+	- Dynamically reloadable plugins
+	- Reporting git updates through webhooks
+	- Reporting trello updates (through mechanize)
+
+Btw, the git webhook is a security vulnerability for your bot if you don't firewall it.
