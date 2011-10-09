@@ -1,0 +1,12 @@
+server: "irc.xs4all.nl"
+port: 6660
+nick: "devbot.test"
+
+channels:
+- "#devbot.test"
+
+trello:
+    user: "devbot@yourdomain.com"
+    password: "password"
+	# Get this from your trello board url
+    board_id: "aaaaaaaaaaaaaaaaaaaaaaaa"
