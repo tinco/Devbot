@@ -2,8 +2,8 @@ module Cinch
 	class DynamicBot < Bot
 		attr_accessor :dynamic_plugins
 
-		def initialize(&b)
-			super(&b)
+		def initialize(*params, &block)
+			super(*params, &block)
 			@dynamic_plugins = []
 		end
 
@@ -33,11 +33,11 @@ module Cinch
 	end
 
 	class DynamicPlugin
-		def self.on(event, regexps = [], *args, &block)
+		def self.on(event, regexps = [], options={}, &block)
 			regexps = [*regexps]
 			regexps = [//] if regexps.empty?
 			@handlers ||= []
-			@handlers << [event, regexps, args, block]	
+			@handlers << [event, regexps, options, block]	
 		end
 
 		attr_accessor :bot
@@ -63,7 +63,7 @@ module Cinch
 		end
 
 		# Registers a handler.
-		def on(event, regexps = [], *args, &block)
+		def on(event, regexps = [], options={}, &block)
 			regexps = [*regexps]
 			regexps = [//] if regexps.empty?
 
@@ -85,7 +85,7 @@ module Cinch
 							  end
 						  end
 				@bot.debug "[on handler] Registering handler with pattern `#{pattern.inspect}`, reacting on `#{event}`"
-				handler = Handler.new(@bot, event, pattern, args, &block)
+				handler = Handler.new(@bot, event, pattern, options, &block)
 				@handlers << handler
 				@bot.handlers.register handler
 			end
