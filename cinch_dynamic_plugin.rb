@@ -33,11 +33,9 @@ module Cinch
 	end
 
 	class DynamicPlugin
-		def self.on(event, regexps = [], options={}, &block)
-			regexps = [*regexps]
-			regexps = [//] if regexps.empty?
+		def self.on(event, regexp=//, options={}, &block)
 			@handlers ||= []
-			@handlers << [event, regexps, options, block]	
+			@handlers << [event, regexp, options, block]	
 		end
 
 		attr_accessor :bot
@@ -63,34 +61,31 @@ module Cinch
 		end
 
 		# Registers a handler.
-		def on(event, regexps = [], options={}, &block)
-			regexps = [*regexps]
-			regexps = [//] if regexps.empty?
-
-			event = event.to_sym
+		def on(event, regexp = //, options={}, &block)
+			event = event.to_s.to_sym
 
 			@handlers ||= []
 
-			regexps.each do |regexp|
-				pattern = case regexp
-						  when Pattern
-							  regexp
-						  when Regexp
-							  Pattern.new(nil, regexp, nil)
+			pattern = case regexp
+					  when Pattern
+						  regexp
+					  when Regexp
+						  Pattern.new(nil, regexp, nil)
+					  else
+						  if event == :ctcp
+							  Pattern.new(/^/, /#{Regexp.escape(regexp.to_s)}(?:$| .+)/, nil)
 						  else
-							  if event == :ctcp
-								  Pattern.new(/^/, /#{Regexp.escape(regexp.to_s)}(?:$| .+)/, nil)
-							  else
-								  Pattern.new(/^/, /#{Regexp.escape(regexp.to_s)}/, /$/)
-							  end
+							  Pattern.new(/^/, /#{Regexp.escape(regexp.to_s)}/, /$/)
 						  end
-				@bot.debug "[on handler] Registering handler with pattern `#{pattern.inspect}`, reacting on `#{event}`"
-				handler = Handler.new(@bot, event, pattern, options, &block)
-				@handlers << handler
-				@bot.handlers.register handler
-			end
+					  end
+			@bot.debug "[#{self.class.name}] Registering handler with pattern `#{pattern.inspect}`, reacting on `#{event}`"
+			plugin = self
+			b = lambda {|*params| plugin.instance_exec(*params, &block)}
+			handler = Handler.new(@bot, event, pattern, options, &b)
+			@handlers << handler
+			@bot.handlers.register handler
 
-			return @handlers
+			return handler
 		end	
 	end
 end
